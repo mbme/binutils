@@ -1,0 +1,50 @@
+# Maintainer: mbme
+
+pkgname=mb-binutils
+pkgrel=1
+pkgver="0.0.0"
+pkgdesc='CLI apps for controlling Linux laptop backlight, volume, microphone, touchpad etc.'
+arch=(x86_64)
+license=(MIT)
+depends=(libnotify libpulse light xorg-xinput)
+makedepends=(git cargo)
+
+pkgver() {
+  cd ..
+
+  git describe --abbrev=0 --tags
+}
+
+prepare() {
+  cd ..
+
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd ..
+
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+
+  export BINUTILS_VERSION=$(git describe --tags)
+
+  cargo build --frozen --release
+}
+
+check() {
+  cd ..
+
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_TARGET_DIR=target
+
+  cargo test --locked --release
+}
+
+package() {
+  cd ..
+
+  install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/mb-audio"
+  install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/mb-backlight"
+  install -Dm0755 -t "$pkgdir/usr/bin/" "target/release/mb-touchpad"
+}

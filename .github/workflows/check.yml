@@ -1,0 +1,25 @@
+name: Check code
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # toolchain must be selected before the rust-cache init
+      - name: Use Rust
+        run: rustup toolchain install stable --profile minimal
+
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Lint & test Rust
+        run: cargo clippy --all-targets --all-features -- -D warnings && cargo test
